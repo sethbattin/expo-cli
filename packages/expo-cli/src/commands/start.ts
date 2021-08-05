@@ -20,6 +20,7 @@ export default (program: any) => {
       'Port to start the native Metro bundler on (does not apply to web or tunnel). Default: 19000'
     )
     .option('--no-https', 'To start webpack with http protocol')
+    .option('--no-dev-client', 'Turn off development client (if installed)')
     .urlOpts()
     .allowOffline()
     .asyncActionProjectDir(

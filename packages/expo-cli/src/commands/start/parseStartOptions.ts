@@ -3,6 +3,7 @@ import { Project, ProjectSettings, Versions, Webpack } from 'xdl';
 import * as WebpackEnvironment from 'xdl/build/webpack-utils/WebpackEnvironment';
 
 import { AbortCommandError } from '../../CommandError';
+import { getDevClientVersion } from '../../analytics/getDevClientProperties';
 import Log from '../../log';
 import { URLOptions } from '../../urlOpts';
 import { resolvePortAsync } from '../run/utils/resolvePortAsync';
@@ -64,7 +65,7 @@ export async function normalizeOptionsAsync(
 ): Promise<NormalizedOptions> {
   const rawArgs = options.parent?.rawArgs || [];
 
-  const opts = parseRawArguments(options, rawArgs);
+  const opts = parseRawArguments(projectRoot, options, rawArgs);
 
   if (options.webOnly) {
     const webpackPort = await resolvePortAsync(projectRoot, {
@@ -95,7 +96,11 @@ export async function normalizeOptionsAsync(
 // The main purpose of this function is to take existing options object and
 // support boolean args with as defined in the hasBooleanArg and getBooleanArg
 // functions.
-export function parseRawArguments(options: RawStartOptions, rawArgs: string[]): NormalizedOptions {
+export function parseRawArguments(
+  projectRoot: string,
+  options: RawStartOptions,
+  rawArgs: string[]
+): NormalizedOptions {
   const opts: NormalizedOptions = {
     ...options, // This is necessary to ensure we don't drop any options
     webOnly: !!options.webOnly, // This is only ever true in the start:web command
@@ -131,7 +136,13 @@ export function parseRawArguments(options: RawStartOptions, rawArgs: string[]): 
     opts.tunnel = getBooleanArg(rawArgs, 'tunnel');
   }
 
+  opts.devClient = setBooleanArg('dev-client', rawArgs, isDevClientPackageInstalled(projectRoot));
+
   return opts;
+}
+
+function isDevClientPackageInstalled(projectRoot: string): boolean {
+  return getDevClientVersion(projectRoot) != null;
 }
 
 async function cacheOptionsAsync(projectRoot: string, options: NormalizedOptions): Promise<void> {

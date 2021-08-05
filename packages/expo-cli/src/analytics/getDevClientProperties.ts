@@ -7,7 +7,7 @@ const getAccountName = memoize((exp: Pick<ExpoConfig, 'owner'>) => {
   return getAccountUsername(exp);
 });
 
-const getDevClientVersion = memoize((projectRoot: string): JSONValue | undefined => {
+export const getDevClientVersion = memoize((projectRoot: string): JSONValue | undefined => {
   try {
     const devClientPackage = resolveFrom.silent(projectRoot, 'expo-dev-client/package.json');
     if (devClientPackage) {
